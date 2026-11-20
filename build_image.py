@@ -1,29 +1,28 @@
 #!/usr/bin/env python3
-"""Draw the Friday 20 November 2026 front page as a 1024x1024 PNG.
+"""Render the Friday 20 November 2026 front page to a 1024x1024 PNG.
 
-Everything is fixed: the same text, layout and fonts every run, so two
-runs produce identical bytes. It only runs on my own machine to make the
-picture; the entry itself (main.py) just copies the finished picture
-into /output/entry.png.
+Fixed text, fixed geometry, fixed fonts: every run writes identical
+bytes. This script only runs on my own machine to draw the picture;
+the entry (main.py) just places the finished picture where it belongs.
 """
 
 from PIL import Image, ImageDraw, ImageFont as F
 
-W = H = 1024
-INK = (20, 20, 20)
-PAPER = (250, 244, 224)
-NAVY = (18, 42, 84)
-RED = (178, 34, 34)
-GOLD = (198, 158, 24)
-GREY = (96, 96, 96)
-SNOW = (255, 255, 255)
-EDGE = 26
+PAGE = 1024
+BLACK = (20, 20, 20)
+CREAM = (250, 244, 224)
+DEEP = (18, 42, 84)
+SCARLET = (178, 34, 34)
+AMBER = (198, 158, 24)
+ASH = (96, 96, 96)
+WHITE = (255, 255, 255)
+MARGIN = 26
 
 SERIF = "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf"
-BOLD = "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
-PLAIN = "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"
+HEAVY = "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
+LIGHT = "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"
 
-STORIES = (
+ITEMS = (
     ("KYIV HIT BY BALLISTIC MISSILES",
      "Russia strikes Kyiv overnight, damaging three bridges over the "
      "Dnipro, while a drone hits a hospital in Kharkiv and injures four."),
@@ -46,112 +45,113 @@ STORIES = (
 )
 
 
-def face(path, size):
+def font(path, size):
     return F.truetype(path, size)
 
 
-def wrap(d, text, font, width):
-    lines, cur = [], ""
+def fit_lines(d, text, fnt, width):
+    """Split text into lines no wider than width, word by word."""
+    out, current = [], ""
     for word in text.split():
-        trial = (cur + " " + word).strip()
-        if d.textlength(trial, font=font) <= width:
-            cur = trial
+        candidate = (current + " " + word).strip()
+        if d.textlength(candidate, font=fnt) <= width:
+            current = candidate
         else:
-            if cur:
-                lines.append(cur)
-            cur = word
-    if cur:
-        lines.append(cur)
-    return lines
+            if current:
+                out.append(current)
+            current = word
+    if current:
+        out.append(current)
+    return out
 
 
-def para(d, x, y, lines, font, color, step):
+def put_lines(d, x, y, lines, fnt, color, step):
     for line in lines:
-        d.text((x, y), line, font=font, fill=color)
+        d.text((x, y), line, font=fnt, fill=color)
         y += step
     return y
 
 
-def number_chip(d, x, y, n):
-    """A small red square with a white story number."""
-    d.rectangle([x, y, x + 30, y + 30], fill=RED)
+def num_disc(d, x, y, n):
+    """A scarlet disc holding a white story number."""
+    d.ellipse([x, y, x + 32, y + 32], fill=SCARLET)
     label = str(n)
-    tw = d.textlength(label, font=face(BOLD, 20))
-    d.text((x + (30 - tw) / 2, y + 3), label, font=face(BOLD, 20), fill=SNOW)
+    tw = d.textlength(label, font=font(HEAVY, 20))
+    d.text((x + (32 - tw) / 2, y + 4), label, font=font(HEAVY, 20), fill=WHITE)
 
 
-def rule(d, y, color=INK, width=3):
-    d.line([(EDGE, y), (W - EDGE, y)], fill=color, width=width)
+def hline(d, y, color=BLACK, width=3):
+    d.line([(MARGIN, y), (PAGE - MARGIN, y)], fill=color, width=width)
 
 
-def main():
-    page = Image.new("RGB", (W, H), PAPER)
-    d = ImageDraw.Draw(page)
+def draw():
+    sheet = Image.new("RGB", (PAGE, PAGE), CREAM)
+    d = ImageDraw.Draw(sheet)
 
-    # Date bar: navy, with a gold rule underneath.
-    d.rectangle([0, 0, W, 46], fill=NAVY)
-    d.text((EDGE, 11), "FRIDAY 20 NOVEMBER 2026",
-           font=face(BOLD, 22), fill=SNOW)
+    # Navy date bar with an amber rule underneath it.
+    d.rectangle([0, 0, PAGE, 46], fill=DEEP)
+    d.text((MARGIN, 11), "FRIDAY 20 NOVEMBER 2026",
+           font=font(HEAVY, 22), fill=WHITE)
     tag = "THE WORLD IN ONE IMAGE"
-    tw = d.textlength(tag, font=face(BOLD, 22))
-    d.text((W - EDGE - tw, 11), tag, font=face(BOLD, 22), fill=GOLD)
-    d.line([(0, 46), (W, 46)], fill=GOLD, width=3)
+    tw = d.textlength(tag, font=font(HEAVY, 22))
+    d.text((PAGE - MARGIN - tw, 11), tag, font=font(HEAVY, 22), fill=AMBER)
+    d.line([(0, 46), (PAGE, 46)], fill=AMBER, width=3)
 
-    # Masthead.
+    # Masthead and index strip.
     y = 66
-    d.text((EDGE, y), "FRIDAY, 20 NOVEMBER 2026",
-           font=face(SERIF, 58), fill=INK)
-    y += 76
-    d.text((EDGE, y), "Six stories that sum up the day, from Kyiv to Antalya",
-           font=face(PLAIN, 24), fill=RED)
+    d.text((MARGIN, y), "FRIDAY 20 NOVEMBER 2026",
+           font=font(SERIF, 56), fill=BLACK)
+    y += 74
+    d.text((MARGIN, y), "Six stories that sum up the day — Kyiv to Cincinnati",
+           font=font(LIGHT, 24), fill=SCARLET)
     y += 38
-    rule(d, y, width=4)
+    hline(d, y, width=4)
     y += 14
-    d.text((EDGE, y), "KYIV  ·  RIYADH  ·  ANTALYA  ·  GENOA  ·  CALIFORNIA  ·  CINCINNATI",
-           font=face(BOLD, 17), fill=GREY)
+    d.text((MARGIN, y), "KYIV  ·  HORMUZ  ·  ANTALYA  ·  GENOA  ·  CALIFORNIA  ·  CINCINNATI",
+           font=font(HEAVY, 17), fill=ASH)
     y += 30
 
-    # Lead story: full width, navy bar on the left.
-    head, body = STORIES[0]
-    lead = wrap(d, body, face(PLAIN, 23), W - 2 * EDGE - 52)
-    box_h = 40 + 34 + len(lead) * 29 + 22
-    d.rectangle([EDGE, y, W - EDGE, y + box_h], outline=INK, width=2)
-    d.rectangle([EDGE, y, EDGE + 14, y + box_h], fill=NAVY)
-    number_chip(d, EDGE + 30, y + 16, 1)
-    d.text((EDGE + 72, y + 14), head, font=face(BOLD, 30), fill=NAVY)
-    para(d, EDGE + 30, y + 62, lead, face(PLAIN, 23), INK, 29)
+    # Lead story: full width, scarlet rule across the top.
+    head, body = ITEMS[0]
+    lead = fit_lines(d, body, font(LIGHT, 23), PAGE - 2 * MARGIN - 40)
+    box_h = 16 + 36 + len(lead) * 29 + 20
+    d.rectangle([MARGIN, y, PAGE - MARGIN, y + box_h], outline=BLACK, width=2)
+    d.rectangle([MARGIN, y, PAGE - MARGIN, y + 6], fill=SCARLET)
+    num_disc(d, MARGIN + 16, y + 20, 1)
+    d.text((MARGIN + 60, y + 18), head, font=font(HEAVY, 30), fill=SCARLET)
+    put_lines(d, MARGIN + 16, y + 64, lead, font(LIGHT, 23), BLACK, 29)
     y += box_h + 18
 
     # Four stories in a two-by-two grid.
-    cw = (W - 2 * EDGE - 16) // 2
-    ch = 172
-    for pos, (head, body) in enumerate(STORIES[1:5]):
-        gx = EDGE + (pos % 2) * (cw + 16)
+    cw = (PAGE - 2 * MARGIN - 16) // 2
+    ch = 170
+    for pos, (head, body) in enumerate(ITEMS[1:5]):
+        gx = MARGIN + (pos % 2) * (cw + 16)
         gy = y + (pos // 2) * (ch + 16)
-        d.rectangle([gx, gy, gx + cw, gy + ch], outline=INK, width=2)
-        number_chip(d, gx + 12, gy + 12, pos + 2)
-        heads = wrap(d, head, face(BOLD, 20), cw - 62)[:2]
-        ny = para(d, gx + 52, gy + 12, heads, face(BOLD, 20), INK, 24)
-        paras = wrap(d, body, face(PLAIN, 19), cw - 26)[:4]
-        para(d, gx + 13, ny + 10, paras, face(PLAIN, 19), INK, 24)
+        d.rectangle([gx, gy, gx + cw, gy + ch], outline=BLACK, width=2)
+        num_disc(d, gx + 12, gy + 12, pos + 2)
+        heads = fit_lines(d, head, font(HEAVY, 20), cw - 64)[:2]
+        ny = put_lines(d, gx + 54, gy + 12, heads, font(HEAVY, 20), BLACK, 24)
+        paras = fit_lines(d, body, font(LIGHT, 19), cw - 26)[:4]
+        put_lines(d, gx + 13, ny + 10, paras, font(LIGHT, 19), BLACK, 24)
     y += 2 * ch + 16 + 18
 
-    # Last story on a navy band.
-    head, body = STORIES[5]
-    d.rectangle([EDGE, y, W - EDGE, y + 104], fill=NAVY)
-    number_chip(d, EDGE + 14, y + 14, 6)
-    d.text((EDGE + 56, y + 14), head, font=face(BOLD, 24), fill=GOLD)
-    tail = wrap(d, body, face(PLAIN, 20), W - 2 * EDGE - 30)
-    para(d, EDGE + 15, y + 50, tail, face(PLAIN, 20), SNOW, 26)
+    # Last story on a deep-navy band.
+    head, body = ITEMS[5]
+    d.rectangle([MARGIN, y, PAGE - MARGIN, y + 104], fill=DEEP)
+    num_disc(d, MARGIN + 14, y + 14, 6)
+    d.text((MARGIN + 58, y + 14), head, font=font(HEAVY, 24), fill=AMBER)
+    tail = fit_lines(d, body, font(LIGHT, 20), PAGE - 2 * MARGIN - 30)
+    put_lines(d, MARGIN + 15, y + 50, tail, font(LIGHT, 20), WHITE, 26)
 
-    # Gold footer rule, then the source line.
-    d.line([(EDGE, H - 48), (W - EDGE, H - 48)], fill=GOLD, width=2)
-    d.text((EDGE, H - 34), "Sources: BBC, Reuters, AP, Le Monde, AFP  —  20 Nov 2026",
-           font=face(PLAIN, 18), fill=GREY)
+    # Amber footer rule, then the source line.
+    d.line([(MARGIN, PAGE - 48), (PAGE - MARGIN, PAGE - 48)], fill=AMBER, width=2)
+    d.text((MARGIN, PAGE - 34), "Sources: BBC, Reuters, AP, Le Monde, AFP  —  20 Nov 2026",
+           font=font(LIGHT, 18), fill=ASH)
 
-    page.save("entry.png", format="PNG", optimize=True)
+    sheet.save("entry.png", format="PNG", optimize=True)
     print("saved entry.png")
 
 
 if __name__ == "__main__":
-    main()
+    draw()

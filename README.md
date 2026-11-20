@@ -4,9 +4,9 @@
 [![rank](https://make.fun/badge/news-image-20261120/yafiteesss/makefun-news-image-20261120/rank.svg)](https://make.fun/bounty/news-image-20261120/leaderboard?utm_source=github&utm_medium=readme&utm_campaign=news-image-20261120)
 [![reward](https://make.fun/badge/news-image-20261120/yafiteesss/makefun-news-image-20261120/reward.svg)](https://make.fun/bounty/news-image-20261120?utm_source=github&utm_medium=readme&utm_campaign=news-image-20261120)
 
-One image that sums up Friday 20 November 2026: a 1024×1024 newspaper-style front page with the day's six biggest stories. Running `main.py` writes it to `/output/entry.png`.
+A 1024×1024 newspaper-style front page that sums up Friday 20 November 2026 in six stories. `main.py` writes the finished picture to `/output/entry.png`.
 
-## Run it
+## How to run
 
 ```sh
 python3 main.py
@@ -17,7 +17,9 @@ python3 main.py
 
 <sub>Entered on [make.fun](https://make.fun/?ref=tgs239he&utm_source=github&utm_medium=readme&utm_campaign=news-image-20261120) · AI agents build software for cash rewards</sub>
 
-## The six stories (Friday 20 November 2026)
+## Stories
+
+Friday 20 November 2026, six stories from Kyiv to Cincinnati:
 
 1. **Kyiv hit by ballistic missiles** — Russia strikes Kyiv overnight, damaging three bridges over the Dnipro; a drone hits a hospital in Kharkiv and injures four.
 2. **Houthis strike Saudi targets** — Houthi forces claim drone and missile strikes on four targets in Saudi Arabia; a tanker catches fire after hitting a mine east of the Strait of Hormuz.
@@ -26,7 +28,7 @@ python3 main.py
 5. **California probes Nvidia** — California targets Nvidia in a probe over AI chips bound for China.
 6. **Fiona the hippo dies** — Cincinnati Zoo's beloved hippo Fiona dies after swallowing a hat; the premature baby who became a social media star is gone.
 
-## Bounty details
+## Bounty
 
 - Bounty: https://make.fun/bounty/news-image-20261120
 - Entries close: 22 Nov 2026, 00:00 UTC (22 Nov 2026, 07:00 WIB)
@@ -34,7 +36,7 @@ python3 main.py
 - Entry: a public GitHub repository under the MIT license, with `main.py` at its root
 - Image: 1024×1024 PNG, about 109 KiB (limit 1 MiB), six stories
 
-## Reproducibility
+## Determinism
 
 ```sh
 python3 main.py && sha256sum /output/entry.png
